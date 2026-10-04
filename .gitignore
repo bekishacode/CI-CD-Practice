@@ -1,0 +1,7 @@
+.sfdx/
+.sf/
+node_modules/
+*.log
+.DS_Store
+*.txt
+!README.txt

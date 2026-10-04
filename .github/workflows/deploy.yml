@@ -1,0 +1,38 @@
+name: Deploy
+
+# Runs after a PR is merged (any push to main) and deploys to the sandbox.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-sandbox      # never run two deployments to the same org at once
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to sandbox
+    runs-on: ubuntu-latest
+    env:
+      SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+      TESTS: PracticeGreeterTest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Log in to the sandbox
+        run: |
+          if [ -z "$SF_AUTH_URL" ]; then echo "Secret SF_AUTH_URL is not set"; exit 1; fi
+          echo "$SF_AUTH_URL" > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias sandbox
+          rm -f auth.txt
+      - name: Deploy
+        run: |
+          sf project deploy start --source-dir force-app --target-org sandbox \
+            --test-level RunSpecifiedTests --tests $TESTS --wait 30

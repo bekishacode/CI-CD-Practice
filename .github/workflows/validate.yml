@@ -1,0 +1,36 @@
+name: CI
+
+# Runs on every pull request into main. No path filter on purpose: a required check
+# that sometimes doesn't start would leave PRs stuck at "Expected".
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate            # <- this is the name you select as the required status check
+    runs-on: ubuntu-latest
+    env:
+      SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+      # Tests to run. Add your test classes here as you add code (space separated).
+      TESTS: PracticeGreeterTest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Log in to the sandbox
+        run: |
+          if [ -z "$SF_AUTH_URL" ]; then echo "Secret SF_AUTH_URL is not set"; exit 1; fi
+          echo "$SF_AUTH_URL" > auth.txt
+          sf org login sfdx-url --sfdx-url-file auth.txt --alias sandbox
+          rm -f auth.txt
+      - name: Dry-run deploy and run tests (nothing is changed in the org)
+        run: |
+          sf project deploy start --dry-run --source-dir force-app --target-org sandbox \
+            --test-level RunSpecifiedTests --tests $TESTS --wait 30

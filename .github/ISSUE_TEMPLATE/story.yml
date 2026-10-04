@@ -1,0 +1,22 @@
+name: Story
+description: A unit of work (feature, change, task).
+labels: ["story"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to be done and why
+      placeholder: As a <role>, I want <change>, so that <benefit>.
+    validations: { required: true }
+  - type: textarea
+    id: ac
+    attributes:
+      label: Acceptance criteria
+      value: "- [ ] \n- [ ] "
+    validations: { required: true }
+  - type: dropdown
+    id: area
+    attributes:
+      label: Salesforce area
+      multiple: true
+      options: [Apex, LWC, Flow, Config/Metadata, Data, Integration, Reports]
