@@ -2,7 +2,7 @@
 private class PracticeGreeterTest {
     @IsTest
     static void greetsByName() {
-        Assert.areEqual('Hi, Ada!', PracticeGreeter.greet('Ada'));
+        Assert.areEqual('Hi, Bobi!', PracticeGreeter.greet('Ada'));
     }
     @IsTest
     static void greetsWorldWhenBlank() {
